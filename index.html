@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#d9480f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Giá lưới">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Tính giá lưới chống trượt</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#1b1f24;--mu:#667085;--bd:#dfe3e8;--ac:#d9480f;--acbg:#fff1e8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--card:#1e2126;--tx:#eef0f3;--mu:#9aa3af;--bd:#343a42;--ac:#ff8a4c;--acbg:#33241b}}
+:root[data-theme="dark"]{--bg:#14161a;--card:#1e2126;--tx:#eef0f3;--mu:#9aa3af;--bd:#343a42;--ac:#ff8a4c;--acbg:#33241b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 120px}
+h1{font-size:19px;margin:12px 0 10px}
+h2{font-size:15px;margin:0 0 10px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin:0 -14px;padding-left:14px;padding-right:14px;-webkit-overflow-scrolling:touch}
+.tab{flex:0 0 auto;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:999px;padding:7px 13px;font-size:14px}
+.tab.on{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.tab.add{color:var(--ac);font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+input:focus,select:focus{outline:2px solid var(--ac);outline-offset:-1px}
+.res{background:var(--acbg);border-radius:10px;padding:8px 10px}
+.res b{display:block;font-size:15px}
+.res.total b{color:var(--ac);font-size:17px}
+.full{grid-column:1/-1}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.head strong{font-size:14px}
+button{font:inherit;border:0;border-radius:10px;padding:9px 14px;cursor:pointer}
+.btn{background:var(--ac);color:#fff;font-weight:600}
+.ghost{background:transparent;color:var(--mu);border:1px solid var(--bd)}
+.del{background:transparent;color:#d92d20;padding:4px 8px}
+.warn{color:#d92d20;font-size:12px;margin-top:4px}
+.prow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px;margin-bottom:8px;align-items:end}
+.hint{font-size:12px;color:var(--mu);margin:6px 0 0}
+.cust{font-size:17px;font-weight:600}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar>div{max-width:760px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bar .t{font-size:12px;color:var(--mu)}
+.bar .v{font-size:20px;font-weight:700;color:var(--ac)}
+.kb{position:fixed;left:0;right:0;bottom:0;z-index:20;display:none;align-items:center;gap:4px;background:var(--card);border-top:1px solid var(--bd);padding:4px 12px;height:46px}
+.kb.on{display:flex}
+.kb button{background:transparent;border:0;color:#0a84ff;padding:6px 12px;border-radius:8px;display:flex;align-items:center;touch-action:manipulation}
+.kb button.dis{color:var(--mu);opacity:.45}
+.kb .done{margin-left:auto;font-size:17px;font-weight:600}
+.row{display:flex;align-items:center;gap:10px;margin:10px 0}
+.row input{width:auto}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.item .n{font-weight:600;font-size:15px}
+.item .s{font-size:12px;color:var(--mu)}
+.item .a{font-weight:700;color:var(--ac);white-space:nowrap}
+.sel{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧮 Tính giá lưới chống trượt <span style="font-size:11px;color:var(--mu);font-weight:400">v6</span></h1>
+  <div class="tabs" id="tabs"></div>
+  <div id="view"></div>
+</div>
+<div class="bar" id="bar"><div>
+  <div><div class="t">Tổng khối lượng: <span id="tw">0</span> kg</div><div class="t">Tổng tiền trang này</div></div>
+  <div class="v" id="tt">0 đ</div>
+</div></div>
+
+<div class="kb" id="kb">
+  <button data-k="prev" aria-label="Ô trước"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,15 12,7 20,15"/></svg></button>
+  <button data-k="next" aria-label="Ô sau"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,9 12,17 20,9"/></svg></button>
+  <button data-k="done" class="done">Xong</button>
+</div>
+
+<script>
+var MATS=[["Thép carbon",7.85],["Thép mạ kẽm",7.85],["Inox 304",7.93],["Inox 201",7.80],["Nhôm",2.70],["Đồng",8.96]];
+var KEY="luoi-chong-truot-v2",OLD="luoi-chong-truot-v1";
+var state={prices:[{t:"",p:""}],pages:[],cur:0};
+var $=function(id){return document.getElementById(id)};
+function newRow(){return{l:"",w:"",m:0,t:"",q:"1"}}
+function today(){var d=new Date(),z=function(n){return n<10?"0"+n:""+n};return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())}
+function newPage(){return{name:"",date:today(),rows:[newRow()]}}
+function load(){
+  try{var s=localStorage.getItem(KEY);if(s){var o=JSON.parse(s);if(o&&o.pages&&o.prices){state=o;return}}}catch(e){}
+  try{var s1=localStorage.getItem(OLD);if(s1){var p=JSON.parse(s1);if(p&&p.prices&&p.rows){state.prices=p.prices;state.pages=[{name:"",rows:p.rows.map(function(r){return{l:r.l,w:r.w,m:r.m,t:r.t,q:r.q}})}]}}}catch(e){}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function num(v){var n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:0}
+function fmt(n,d){return n.toLocaleString("vi-VN",{maximumFractionDigits:d==null?0:d})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function priceFor(t){
+  var x=num(t);if(!x)return null;
+  for(var i=0;i<state.prices.length;i++){var p=state.prices[i];if(num(p.t)===x&&num(p.p)>0)return num(p.p)}
+  return null;
+}
+function pageLabel(p,i){return p.name.trim()||"Khách "+(i+1)}
+
+function renderTabs(){
+  var h='<button class="tab'+(state.cur==="prices"?' on':'')+'" data-tab="prices">💰 Bảng giá</button>'+
+    '<button class="tab'+(state.cur==="month"?' on':'')+'" data-tab="month">📊 Tổng tháng</button>';
+  state.pages.forEach(function(p,i){h+='<button class="tab'+(state.cur===i?' on':'')+'" data-tab="'+i+'">'+esc(pageLabel(p,i))+'</button>'});
+  h+='<button class="tab add" id="addPage">+ Thêm trang</button>';
+  $("tabs").innerHTML=h;
+  var on=$("tabs").querySelector(".on");if(on&&on.scrollIntoView)on.scrollIntoView({inline:"center",block:"nearest"});
+}
+
+function renderPrices(){
+  var h='<div class="card"><h2>Bảng giá theo độ dày</h2>';
+  state.prices.forEach(function(p,i){
+    h+='<div class="prow"><div><label>Độ dày (mm)</label><input inputmode="decimal" data-pi="'+i+'" data-f="t" value="'+esc(p.t)+'" placeholder="vd: 2"></div>'+
+    '<div><label>Giá (đồng/kg)</label><input inputmode="numeric" data-pi="'+i+'" data-f="p" value="'+esc(p.p)+'" placeholder="vd: 25000"></div>'+
+    '<button class="del" data-pdel="'+i+'">✕</button></div>';
+  });
+  h+='<button class="ghost" id="addPrice">+ Thêm độ dày</button><p class="hint">Nhập một lần, áp dụng cho tất cả các trang khách hàng.</p></div>';
+  h+='<div class="card"><h2>Xóa dữ liệu</h2><button class="ghost" id="clearPages" style="width:100%">Xóa tất cả trang khách hàng</button><button class="ghost" id="clearPrices" style="width:100%;margin-top:10px">Xóa toàn bộ bảng giá</button><p class="hint">Bấm hai lần liên tiếp để xác nhận. Dữ liệu đã xóa không khôi phục được.</p></div>';
+  h+='<div class="card"><h2>Phiên bản v6</h2><label class="row"><input type="checkbox" id="kbToggle"'+(kbEnabled()?" checked":"")+'><span style="font-size:14px;color:var(--tx)">Hiện thanh ▲ ▼ Xong của app trên bàn phím (tắt nếu bàn phím đã có sẵn)</span></label><button class="ghost" id="forceUpdate" style="width:100%">Tải bản mới nhất</button><p class="hint">Dùng khi app chưa hiện tính năng mới. Dữ liệu đã nhập được giữ nguyên.</p></div>';
+  $("view").innerHTML=h;$("bar").style.display="none";
+}
+
+function renderPage(){
+  var pg=state.pages[state.cur];
+  var h='<div class="card"><label>Tên khách hàng</label><input class="cust" id="custName" value="'+esc(pg.name)+'" placeholder="Nhập tên khách hàng"><label style="margin-top:10px">Ngày</label><input type="date" id="pgDate" value="'+esc(pg.date||today())+'"></div>';
+  pg.rows.forEach(function(r,i){
+    var opts=MATS.map(function(m,j){return '<option value="'+j+'"'+(j==r.m?' selected':'')+'>'+m[0]+' ('+m[1]+')</option>'}).join("");
+    h+='<div class="card" data-i="'+i+'"><div class="head"><strong>Tấm #'+(i+1)+'</strong><button class="del" data-del="'+i+'">Xóa</button></div><div class="grid">'+
+    '<div><label>Chiều dài (mm)</label><input inputmode="decimal" data-f="l" value="'+esc(r.l)+'"></div>'+
+    '<div><label>Chiều rộng (mm)</label><input inputmode="decimal" data-f="w" value="'+esc(r.w)+'"></div>'+
+    '<div class="full"><label>Chất liệu (tỷ trọng g/cm³)</label><select data-f="m">'+opts+'</select></div>'+
+    '<div><label>Độ dày (mm)</label><input inputmode="decimal" data-f="t" value="'+esc(r.t)+'"></div>'+
+    '<div><label>Số lượng (tấm)</label><input inputmode="decimal" data-f="q" value="'+esc(r.q)+'"></div>'+
+    '<div class="res"><label>Khối lượng / tấm</label><b data-o="wt">0 kg</b></div>'+
+    '<div class="res"><label>Khối lượng tổng</label><b data-o="wtt">0 kg</b></div>'+
+    '<div class="res"><label>Giá theo độ dày</label><b data-o="up">—</b></div>'+
+    '<div class="res total"><label>Thành tiền</label><b data-o="amt">0 đ</b></div>'+
+    '</div><div class="warn" data-o="warn"></div></div>';
+  });
+  h+='<button class="btn" id="addRow" style="width:100%">+ Thêm tấm lưới</button>'+
+     '<button class="ghost" id="clearPage" style="width:100%;margin-top:10px">Xóa thông tin đã nhập trong trang này</button>'+
+     '<button class="ghost" id="delPage" style="width:100%;margin-top:10px">Xóa trang này</button>';
+  $("view").innerHTML=h;$("bar").style.display="";
+  calc();
+}
+
+function pageSum(pg){
+  var w=0,amt=0,miss=0;
+  pg.rows.forEach(function(r){
+    var wt=(num(r.l)/1000)*(num(r.w)/1000)*num(r.t)*MATS[r.m][1];
+    var up=priceFor(r.t),q=num(r.q);
+    w+=wt*q;
+    if(up)amt+=wt*q*up;else if(num(r.t)&&wt*q>0)miss++;
+  });
+  return{w:w,amt:amt,miss:miss};
+}
+function renderMonth(){
+  var now=new Date();
+  if(!state.mSel)state.mSel={m:now.getMonth()+1,y:now.getFullYear()};
+  var m=state.mSel.m,y=state.mSel.y,key=y+"-"+(m<10?"0":"")+m;
+  var items=[],tw=0,tt=0,miss=0;
+  state.pages.forEach(function(p,i){
+    if((p.date||"").slice(0,7)===key){var sm=pageSum(p);items.push({i:i,p:p,s:sm});tw+=sm.w;tt+=sm.amt;miss+=sm.miss}
+  });
+  items.sort(function(a,b){return a.p.date>b.p.date?1:(a.p.date<b.p.date?-1:0)});
+  var mo="",yo="",yy;
+  for(var k=1;k<=12;k++)mo+='<option value="'+k+'"'+(k===m?' selected':'')+'>Tháng '+k+'</option>';
+  var y0=Math.min(now.getFullYear()-3,y),y1=Math.max(now.getFullYear()+1,y);
+  for(yy=y0;yy<=y1;yy++)yo+='<option value="'+yy+'"'+(yy===y?' selected':'')+'>Năm '+yy+'</option>';
+  var h='<div class="card"><h2>Tổng trong tháng</h2><div class="sel"><select id="selM">'+mo+'</select><select id="selY">'+yo+'</select></div></div>'+
+    '<div class="card"><div class="grid"><div class="res"><label>Số khách hàng</label><b>'+items.length+'</b></div>'+
+    '<div class="res"><label>Tổng khối lượng</label><b>'+fmt(tw,2)+' kg</b></div>'+
+    '<div class="res total full"><label>Tổng tiền tháng '+m+'/'+y+'</label><b>'+fmt(tt)+' đ</b></div></div>'+
+    (miss?'<div class="warn">Có '+miss+' dòng chưa có giá theo độ dày nên chưa được tính tiền.</div>':'')+'</div>';
+  if(!items.length)h+='<p class="hint">Chưa có khách hàng nào trong tháng này. Ngày của mỗi khách chọn ở đầu trang khách hàng.</p>';
+  items.forEach(function(it){
+    var d=it.p.date;
+    h+='<button class="item" data-go="'+it.i+'"><div><div class="n">'+esc(pageLabel(it.p,it.i))+'</div><div class="s">'+d.slice(8,10)+'/'+d.slice(5,7)+' · '+fmt(it.s.w,2)+' kg</div></div><div class="a">'+fmt(it.s.amt)+' đ</div></button>';
+  });
+  $("view").innerHTML=h;$("bar").style.display="none";
+}
+function render(){renderTabs();if(state.cur==="prices")renderPrices();else if(state.cur==="month")renderMonth();else renderPage()}
+
+function calc(){
+  if(state.cur==="prices")return;
+  var pg=state.pages[state.cur];if(!pg)return;
+  var tw=0,tt=0;
+  pg.rows.forEach(function(r,i){
+    var el=document.querySelector('[data-i="'+i+'"]');if(!el)return;
+    var wt=(num(r.l)/1000)*(num(r.w)/1000)*num(r.t)*MATS[r.m][1];
+    var up=priceFor(r.t),q=num(r.q),amt=up?wt*q*up:0;
+    el.querySelector('[data-o="wt"]').textContent=fmt(wt,3)+" kg";
+    el.querySelector('[data-o="wtt"]').textContent=fmt(wt*q,3)+" kg";
+    el.querySelector('[data-o="up"]').textContent=up?fmt(up)+" đ/kg":"—";
+    el.querySelector('[data-o="amt"]').textContent=fmt(amt)+" đ";
+    el.querySelector('[data-o="warn"]').textContent=(num(r.t)&&!up)?"Chưa có giá cho độ dày "+r.t+" mm. Hãy thêm vào tab Bảng giá.":"";
+    tw+=wt*q;tt+=amt;
+  });
+  $("tw").textContent=fmt(tw,2);$("tt").textContent=fmt(tt)+" đ";
+}
+
+$("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.id==="addPage"){state.pages.push(newPage());state.cur=state.pages.length-1;save();render();window.scrollTo(0,0);return}
+  var t=b.dataset.tab;if(t==null)return;
+  state.cur=(t==="prices"||t==="month")?t:parseInt(t,10);save();render();window.scrollTo(0,0);
+});
+
+$("view").addEventListener("input",function(e){
+  var t=e.target;
+  if(t.id==="pgDate"){state.pages[state.cur].date=t.value;save();return}
+  if(t.id==="selM"||t.id==="selY"){state.mSel={m:parseInt($("selM").value,10),y:parseInt($("selY").value,10)};save();renderMonth();return}
+  if(t.id==="kbToggle"){state.kbBar=t.checked;save();if(!t.checked)kb.classList.remove("on");return}
+  if(t.id==="custName"){state.pages[state.cur].name=t.value;save();renderTabs();return}
+  if(t.dataset.pi!=null){state.prices[t.dataset.pi][t.dataset.f]=t.value;save();return}
+  var c=t.closest("[data-i]");if(!c||!t.dataset.f)return;
+  var r=state.pages[state.cur].rows[c.dataset.i],f=t.dataset.f;
+  r[f]=f==="m"?parseInt(t.value,10):t.value;save();calc();
+});
+
+var armed=null;
+$("view").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.id==="addPrice"){state.prices.push({t:"",p:""});save();renderPrices();return}
+  if(b.dataset.pdel!=null){state.prices.splice(b.dataset.pdel,1);if(!state.prices.length)state.prices.push({t:"",p:""});save();renderPrices();return}
+  if(b.id==="addRow"){state.pages[state.cur].rows.push(newRow());save();renderPage();
+    setTimeout(function(){var c=document.querySelectorAll("[data-i]");if(c.length)c[c.length-1].scrollIntoView({behavior:"smooth",block:"center"})},50);return}
+  if(b.dataset.del!=null){var rows=state.pages[state.cur].rows;rows.splice(b.dataset.del,1);if(!rows.length)rows.push(newRow());save();renderPage();return}
+  if(b.dataset.go!=null){state.cur=parseInt(b.dataset.go,10);save();render();window.scrollTo(0,0);return}
+  if(b.id==="forceUpdate"){
+    b.textContent="Đang cập nhật...";
+    var jobs=[];
+    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}));
+    if(window.caches)jobs.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}));
+    Promise.all(jobs).catch(function(){}).then(function(){location.reload()});
+    return;
+  }
+  var ACTS={
+    delPage:function(){
+      state.pages.splice(state.cur,1);
+      if(!state.pages.length){state.pages.push(newPage());state.cur=0}
+      else if(state.cur>=state.pages.length){state.cur=state.pages.length-1}
+    },
+    clearPage:function(){var pg=state.pages[state.cur];pg.name="";pg.rows=[newRow()]},
+    clearPages:function(){state.pages=[newPage()];state.cur=0},
+    clearPrices:function(){state.prices=[{t:"",p:""}]}
+  };
+  if(ACTS[b.id]){
+    if(armed&&armed.id===b.id){clearTimeout(armed.timer);armed=null;ACTS[b.id]();save();render();window.scrollTo(0,0);return}
+    if(armed){clearTimeout(armed.timer);armed.fire()}
+    var old=b.textContent;
+    b.textContent="Bấm lần nữa để xác nhận xóa";b.style.color="#d92d20";
+    var fire=function(){b.textContent=old;b.style.color=""};
+    armed={id:b.id,fire:fire,timer:setTimeout(function(){armed=null;fire()},3000)};
+  }
+});
+
+var PRESET=[["0,4",7],["0,5",6.5],["0,6",6.5],["0,8",5.5],["1",5],["1,2",4],["1,5",3.5],["2",2.5],["2,5",2.2],["3",2],["3,2",2],["3,5",2],["4",2.5],["4,5",2.5]];
+function seed(){
+  if(state.seeded)return;
+  var have={};
+  state.prices.forEach(function(p){if(num(p.t)&&num(p.p)>0)have[num(p.t)]=1});
+  var list=state.prices.filter(function(p){return num(p.t)||num(p.p)});
+  PRESET.forEach(function(x){if(!have[num(x[0])])list.push({t:x[0],p:String(Math.round(x[1]*1000))})});
+  list.sort(function(a,b){return num(a.t)-num(b.t)});
+  state.prices=list;state.seeded=true;save();
+}
+/* Thanh chuyển ô nhập trên bàn phím */
+var kb=$("kb"),curIn=null,lastAct=0;
+function kbPos(){var v=window.visualViewport;kb.style.bottom=v?Math.max(0,window.innerHeight-v.height-v.offsetTop)+"px":"0px"}
+var standalone=(window.navigator.standalone===true)||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
+function kbEnabled(){return state.kbBar===undefined?standalone:!!state.kbBar}
+function fields(){return Array.prototype.slice.call(document.querySelectorAll("#view input:not([type=checkbox]):not([type=date])"))}
+function kbState(){
+  var l=fields(),i=l.indexOf(curIn);
+  kb.querySelector('[data-k="prev"]').classList.toggle("dis",i<=0);
+  kb.querySelector('[data-k="next"]').classList.toggle("dis",i<0||i>=l.length-1);
+}
+function goto(el){if(!el)return;el.focus();try{el.scrollIntoView({block:"center",behavior:"smooth"})}catch(e){}}
+document.addEventListener("focusin",function(e){
+  var t=e.target;
+  if(t.tagName==="INPUT"&&t.type!=="checkbox"&&t.type!=="date"&&$("view").contains(t)){
+    curIn=t;
+    if(kbEnabled()){kb.classList.add("on");kbPos();kbState()}
+    setTimeout(function(){if(document.activeElement===t){try{t.select()}catch(x){}}},30);
+  }
+});
+document.addEventListener("focusout",function(){
+  setTimeout(function(){
+    var a=document.activeElement;
+    if(!a||a.tagName!=="INPUT"){kb.classList.remove("on");curIn=null}
+  },150);
+});
+if(window.visualViewport){window.visualViewport.addEventListener("resize",kbPos);window.visualViewport.addEventListener("scroll",kbPos)}
+function kbAct(k){
+  if(!curIn)return;
+  var l=fields(),i=l.indexOf(curIn);
+  if(k==="next"){if(l[i+1])goto(l[i+1]);else curIn.blur()}
+  else if(k==="prev"){if(l[i-1])goto(l[i-1])}
+  else if(k==="done"){curIn.blur()}
+}
+function kbTap(e){
+  var b=e.target.closest("button");if(!b)return;
+  e.preventDefault();
+  var now=Date.now();if(now-lastAct<300)return;lastAct=now;
+  kbAct(b.dataset.k);
+}
+kb.addEventListener("pointerdown",kbTap);
+kb.addEventListener("mousedown",function(e){e.preventDefault()});
+kb.addEventListener("touchstart",function(e){e.preventDefault();kbTap(e)},{passive:false});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&e.target.tagName==="INPUT"&&$("view").contains(e.target)){e.preventDefault();curIn=e.target;kbAct("next")}
+});
+
+load();
+seed();
+if(!state.pages.length)state.pages.push(newPage());
+state.pages.forEach(function(p){if(!p.date)p.date=today()});
+if(state.cur!=="prices"&&state.cur!=="month"&&(typeof state.cur!=="number"||!state.pages[state.cur]))state.cur=0;
+render();
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+</script>
+</body>
+</html>
